@@ -468,6 +468,14 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
+        applicationVariants.all {
+            val variant = this
+            variant.outputs.forEach { output ->
+                if (output is com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
+                    output.outputFileName = "Prisma-${variant.baseName}-${variant.versionName}.apk"
+                }
+            }
+        }
 }
 
 // ditchoom's socket-quic-quiche ships libquiche_jni.so with 4 KB LOAD segment alignment
