@@ -34,9 +34,12 @@ actual fun supportsSystemDynamicColors(): Boolean = Build.VERSION.SDK_INT >= Bui
 actual fun systemDynamicColors(dark: Boolean): MillenniumColors? {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return null
     val context = LocalContext.current
-    // Re-read when the configuration changes (Android recreates it after a wallpaper/palette change).
-    val configuration = LocalConfiguration.current
-    return remember(context, configuration, dark) { monetColors(context, dark) }
+        // Re-read only when the night-mode bit actually flips, not on every LocalConfiguration
+        // identity change (keyboard, insets, screen-recording overlay, etc. all touch
+        // Configuration without changing colors, and Configuration has no stable equals(),
+        // so keying remember on the whole object caused a recomposition flicker loop).
+        val nightMode = LocalConfiguration.current.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+        return remember(context, nightMode, dark) { monetColors(context, dark) }
 }
 
 @RequiresApi(Build.VERSION_CODES.S)
